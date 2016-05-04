@@ -26,7 +26,7 @@ import javax.swing.JOptionPane;
 public class Gui extends javax.swing.JFrame {
 
     private File input;
-    private Converter c;
+    private ConverterInterface c;
     private Preferences prefs;
 
     /**
@@ -37,6 +37,7 @@ public class Gui extends javax.swing.JFrame {
         setLocationRelativeTo(null);
 
         prefs = Preferences.userRoot().node(this.getClass().getName());
+        newFormat.setSelected(true);
     }
 
     /**
@@ -53,6 +54,7 @@ public class Gui extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
         jLabel2 = new javax.swing.JLabel();
+        newFormat = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("S5021toXLS");
@@ -79,6 +81,9 @@ public class Gui extends javax.swing.JFrame {
 
         jLabel2.setText(" ");
 
+        newFormat.setText("Új formátum");
+        newFormat.setFocusPainted(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -89,17 +94,22 @@ public class Gui extends javax.swing.JFrame {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1)
                             .addComponent(jButton2)
                             .addComponent(jLabel2))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(newFormat)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1)
+                    .addComponent(newFormat))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -170,7 +180,11 @@ public class Gui extends javax.swing.JFrame {
                 jTextArea1.read(br, null);
                 br.close();
                 jTextArea1.requestFocus();
-                c = new Converter(input);
+                if (!newFormat.isSelected()) {
+                    c = new Converter(input);
+                } else {
+                    c = new Converter2(input);
+                }
                 jLabel2.setText(c.getData().size() + " sor adat");
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -183,5 +197,6 @@ public class Gui extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JCheckBox newFormat;
     // End of variables declaration//GEN-END:variables
 }

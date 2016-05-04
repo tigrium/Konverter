@@ -28,7 +28,7 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
-public class Converter {
+public class Converter implements ConverterInterface {
 
     // 2/25/2015  2014.06.13.
 
@@ -37,9 +37,6 @@ public class Converter {
     private static String patternDataEng = "([0-9]{1,2}/[0-9]{1,2}/[0-9]{4} [0-9]{1,2}:[0-9]{2}:[0-9]{2} (AM)*(PM)*) *(-{0,1}[0-9](\\.[0-9]*){0,1}) *(-{0,1}[0-9](\\.[0-9]*){0,1})*(---)*";
     private static String patternColName = " *(\\S+) *(\\S+)";
     private static String patternSerial = "Serial number:  ([0-9]+)";
-    private static SimpleDateFormat df = new SimpleDateFormat("yyyy.MM.dd. H:mm:ss");
-    private static SimpleDateFormat dfEng = new SimpleDateFormat("M/dd/yyyy h:mm:ss a", Locale.US);
-    private static SimpleDateFormat outputDateTime = new SimpleDateFormat("yyyy.MM.dd. HH:mm");
     private long serialNumber;
     private String name;
     private String[][] colNames;
@@ -102,6 +99,7 @@ public class Converter {
                 System.out.println("nem stimm: " + line);
             }
         }
+        br.close();
     }
 
     public void saveToXls(File output) throws IOException, BiffException, WriteException, ParseException {
@@ -118,7 +116,7 @@ public class Converter {
             cells.add(new Label(2, 3, colNames[1][1]));
         }
 
-        WritableCellFormat outFormat = new WritableCellFormat(new DateFormat(outputDateTime.toPattern()));
+        WritableCellFormat outFormat = new WritableCellFormat(new DateFormat(Const.outputDateTime.toPattern()));
         for (int i = 0; i < data.size(); i++) {
             Row row = data.get(i);
             cells.add(new DateTime(0, 4 + i, row.getDate(), outFormat));
@@ -152,10 +150,10 @@ public class Converter {
         public Row(boolean eng, String... datas) throws ParseException {
 //            System.out.println("datas: " + Arrays.toString(datas));
             if (eng) {
-                date = dfEng.parse(datas[0]);
+                date = Const.dfEng.parse(datas[0]);
 //                System.out.println("date: " + date);
             } else {
-                date = df.parse(datas[0]);
+                date = Const.df.parse(datas[0]);
             }
             data = new double[2];
             data[0] = Double.parseDouble(datas[1]);
@@ -171,7 +169,7 @@ public class Converter {
         }
 
         public String getOutputDateTime() {
-            return outputDateTime.format(date);
+            return Const.outputDateTime.format(date);
         }
 
         public double[] getData() {
