@@ -17,7 +17,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import jxl.Workbook;
+import jxl.format.Alignment;
 import jxl.read.biff.BiffException;
+import jxl.write.DateFormat;
+import jxl.write.DateTime;
+import jxl.write.Label;
+import jxl.write.WritableCell;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
 /**
@@ -40,7 +49,7 @@ public class Converter2 implements ConverterInterface {
         // Első sorból a mérési időszak kell, ez lesz a név.
         line = br.readLine();
         String[] parts = line.split(SEPARATOR);
-        name = parts[2];
+        name = parts[2].replace(":", ".");
 
         // Következő két sort eldobjuk, mert mindig ugyan azok a nevek
         br.readLine();
@@ -52,7 +61,7 @@ public class Converter2 implements ConverterInterface {
         while ((line = br.readLine()) != null) {
             try {
                 data.add(new Row(line.split(SEPARATOR)));
-                System.out.println(i + " " + data.get(data.size() - 1));
+//                System.out.println(i + " " + data.get(data.size() - 1));
             } catch (Exception ex) {
             }
             i++;
@@ -67,7 +76,49 @@ public class Converter2 implements ConverterInterface {
 
     @Override
     public void saveToXls(File output) throws IOException, BiffException, WriteException, ParseException {
+        WritableWorkbook workbook = Workbook.createWorkbook(output);
+        WritableSheet sheet = workbook.createSheet(name, 0);
 
+        List<WritableCell> cells = new ArrayList<>();
+        cells.add(new Label(0, 0, "Dátum"));
+        cells.add(new Label(1, 0, "Időpont"));
+        cells.add(new Label(2, 0, "KD481D1.PV"));
+        cells.add(new Label(3, 0, "KD481D2.PV"));
+        cells.add(new Label(4, 0, "KD481D3.PV"));
+        cells.add(new Label(2, 1, "Oxigén"));
+        cells.add(new Label(3, 1, "PV"));
+        cells.add(new Label(4, 1, "Gáz"));
+        WritableCellFormat cf = new WritableCellFormat();
+        cf.setAlignment(Alignment.CENTRE);
+        for (WritableCell cell : cells) {
+            cell.setCellFormat(cf);
+        }
+
+        //jönnek az adatok
+        WritableCellFormat outDateFormat = new WritableCellFormat(new DateFormat(Const.outputDate.toPattern()));
+        WritableCellFormat outTimeFormat = new WritableCellFormat(new DateFormat(Const.outputTime.toPattern()));
+        for (int i = 0; i < data.size(); i++) {
+            Row row = data.get(i);
+            cells.add(new DateTime(0, 2 + i, row.getDate(), outDateFormat));
+            cells.add(new DateTime(1, 2 + i, row.getDate(), outTimeFormat));
+            if (row.getData()[0] != null) {
+                cells.add(new jxl.write.Number(2, 2 + i, row.getData()[0]));
+            }
+            if (row.getData()[1] != null) {
+                cells.add(new jxl.write.Number(3, 2 + i, row.getData()[1]));
+            }
+            if (row.getData()[2] != null) {
+                cells.add(new jxl.write.Number(4, 2 + i, row.getData()[2]));
+            }
+        }
+
+        // hozzáadjuk a munkalaphoz
+        for (WritableCell cell : cells) {
+            sheet.addCell(cell);
+        }
+
+        workbook.write();
+        workbook.close();
     }
 
     @Override
@@ -97,11 +148,9 @@ public class Converter2 implements ConverterInterface {
             if (date == null) {
                 throw new Exception("First data is not date.");
             }
-            if (datas.length != 4) {
-                throw new Exception("Data length != 4");
-            }
+
             data = new Double[3];
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < datas.length; i++) {
                 try {
                     data[i - 1] = Double.parseDouble(datas[i]);
                 } catch (Exception ex) {
@@ -110,9 +159,17 @@ public class Converter2 implements ConverterInterface {
             }
         }
 
+        public Date getDate() {
+            return date;
+        }
+
+        public Double[] getData() {
+            return data;
+        }
+
         @Override
         public String toString() {
-            return Const.outputDateTime.format(date) + Arrays.toString(data);
+            return Const.outputDateTime.format(date) + " " + Arrays.toString(data);
         }
     }
 

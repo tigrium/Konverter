@@ -17,4 +17,6 @@ public class Const {
     public static SimpleDateFormat df2 = new SimpleDateFormat("yyyy.MM.dd H:mm:ss");
     public static SimpleDateFormat dfEng = new SimpleDateFormat("M/dd/yyyy h:mm:ss a", Locale.US);
     public static SimpleDateFormat outputDateTime = new SimpleDateFormat("yyyy.MM.dd. HH:mm");
+    public static SimpleDateFormat outputDate = new SimpleDateFormat("yyyy.MM.dd.");
+    public static SimpleDateFormat outputTime = new SimpleDateFormat("HH:mm");
 }
